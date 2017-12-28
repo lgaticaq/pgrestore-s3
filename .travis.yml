@@ -1,0 +1,28 @@
+---
+language: ruby
+
+sudo: required
+
+services:
+  - docker
+
+env:
+  - VERSION=1.0.0
+
+install:
+  - |
+    docker build -t lgatica/pgrestore-s3:latest
+    -t lgatica/pgrestore-s3:${TRAVIS_TAG:-$VERSION} .
+
+script:
+  - docker run --rm lgatica/pgrestore-s3:$VERSION pg_restore --version
+
+after_success:
+  if ([ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push lgatica/pgrestore-s3:latest;
+    docker push lgatica/pgrestore-s3:$VERSION;
+  fi
+
+notifications:
+  email: false
