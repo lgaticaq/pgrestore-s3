@@ -7,7 +7,7 @@ services:
   - docker
 
 env:
-  - VERSION=1.0.1
+  - VERSION=1.0.2
 
 install:
   - docker build -t lgatica/pgrestore-s3:latest -t lgatica/pgrestore-s3:${TRAVIS_TAG:-$VERSION} .
@@ -15,12 +15,15 @@ install:
 script:
   - docker run --rm lgatica/pgrestore-s3:${TRAVIS_TAG:-$VERSION} pg_restore --version
 
-after_success:
-  if ([ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push lgatica/pgrestore-s3:latest;
-    docker push lgatica/pgrestore-s3:$TRAVIS_TAG;
-  fi
+before_deploy:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
+deploy:
+  provider: script
+  script: docker push lgatica/mongorestore-s3
+  skip_cleanup: true
+  on:
+    branch: master
 
 notifications:
   email: false
