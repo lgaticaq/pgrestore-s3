@@ -20,7 +20,7 @@ before_deploy:
 
 deploy:
   provider: script
-  script: docker push lgatica/mongorestore-s3
+  script: docker push lgatica/pgrestore-s3
   skip_cleanup: true
   on:
     branch: master
